@@ -37,11 +37,13 @@ public class Cliente {
         }
     }
 
-    private static void connectToServer(File f) {
+    private static void connectToServer() {
+        String path = "/home/alejandro/.ssh/";
+        String filename = "id_rsa.pub";
+        File f = new File(path+filename);
         int numPuerto = 8000;
         String host = "127.0.0.1";
         try (Socket echoSocket = new Socket(host, numPuerto);
-             InputStream is = echoSocket.getInputStream();
              OutputStream os = echoSocket.getOutputStream();
              ObjectOutputStream oos = new ObjectOutputStream(os);
         )
