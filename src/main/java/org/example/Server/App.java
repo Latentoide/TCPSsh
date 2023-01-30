@@ -28,39 +28,21 @@ public class App {
                         Mensaje objectoCli;
 
                         while ((objectoCli = (Mensaje) oisCliente.readObject()) != null) {
+                            System.out.println(objectoCli);
                             String str = "";
 
                             try(BufferedReader br = new BufferedReader(new FileReader(objectoCli.getF()))){
-                                KeyPair kp = KeyPair.load(new JSch(), "/home/alejandro/.ssh/id_rsa");
-                                kp.writePublicKey(objectoCli.getF()+".pub", "alejandro@lmde5");
+                                while (br.ready())
+                                    str += br.readLine();
+                                File f = new File("/home/alejandro/.ssh/authorized_keys");
+                                try(BufferedWriter bw = new BufferedWriter(new FileWriter(f))){
+                                    bw.append("\n");
+                                    bw.append(str);
+                                }catch (Exception e){
+                                    e.printStackTrace();
+                                }
                             }catch (Exception e){
                                 e.printStackTrace();
-                            }
-
-                            try {
-                                JSch jsch = new JSch();
-                                String user = "alejandro@lmde5";
-                                String host = "127.0.0.1";
-                                int port = 22;
-                                String privateKey = "/home/alejandro/.ssh/id_rsa";
-                                jsch.addIdentity(privateKey);
-                                System.out.println("identity added ");
-                                Session session = jsch.getSession(user, host, port);
-
-                                // Si es necesario introducir el password para iniciar sesion
-                                session.setPassword("alejandro");
-                                // Para permitir conectarse sin comprobar el host
-                                session.setConfig("StrictHostKeyChecking", "no");
-                                System.out.println("session created.");
-                                // Conectamos
-                                session.connect();
-                                System.out.println("session connected.....");
-                                Channel channel = session.openChannel("shell");
-                                channel.setInputStream(System.in);
-                                channel.setOutputStream(System.out);
-                                channel.connect(3 * 1000);
-                            } catch (Exception e) {
-                                System.err.println(e);
                             }
                         }
 

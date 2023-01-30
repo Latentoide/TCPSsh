@@ -17,39 +17,84 @@ import java.nio.file.attribute.FileTime;
 import java.util.Date;
 
 public class Cliente {
-    public static void main(String[] args) throws IOException {
-        String path = "/home/alejandro/.ssh/";
-        String filename = "id_rsa";
-        File f = new File(path+filename);
-        if(f.exists()){
-            Path pFile = Paths.get(f.getAbsolutePath());
-            BasicFileAttributes bfa = Files.readAttributes(pFile, BasicFileAttributes.class);
-            FileTime ft = bfa.creationTime();
-            long fecha = (new Date().getTime() - new Date(ft.toMillis()).getTime())/86400000;
-            System.out.println(fecha);
-            if (fecha > 30 ) {
-                f.delete();
+    public static void main(String[] args)  {
+        try{
+            connectSsh();
+        }catch (Exception e) {
+            String path = "/home/alejandro/.ssh/";
+            String filename = "id_rsa";
+            File f = new File(path+filename);
+            if(f.exists()){
+                Path pFile = Paths.get(f.getAbsolutePath());
+                BasicFileAttributes bfa = null;
+                try {
+                    bfa = Files.readAttributes(pFile, BasicFileAttributes.class);
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+                FileTime ft = bfa.creationTime();
+                long fecha = (new Date().getTime() - new Date(ft.toMillis()).getTime())/86400000;
+                System.out.println(fecha);
+                if (fecha > 30 ) {
+                    f.delete();
+                    createPass(path, filename);
+                }
+                connectToServer();
+            }else {
                 createPass(path, filename);
             }
-            connectToServer();
-        }else{
-            createPass(path, filename);
+
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException ex) {
+                throw new RuntimeException(ex);
+            }
+            connectSsh();
+        }
+
+
+    }
+
+    private static void connectSsh() {
+        try {
+            JSch jsch = new JSch();
+            String user = "alejandro";
+            String host = "127.0.0.1";
+            int port = 22;
+            String privateKey = "/home/alejandro/.ssh/id_rsa";
+            jsch.addIdentity(privateKey);
+            System.out.println("identity added ");
+            Session session = jsch.getSession(user, host, port);
+
+            // Si es necesario introducir el password para iniciar sesion
+            //session.setPassword("alejandro");
+            // Para permitir conectarse sin comprobar el host
+            session.setConfig("StrictHostKeyChecking", "no");
+            System.out.println("session created.");
+            // Conectamos
+            session.connect();
+            System.out.println("session connected.....");
+            Channel channel = session.openChannel("shell");
+            channel.setInputStream(System.in);
+            channel.setOutputStream(System.out);
+            channel.connect(3 * 1000);
+        } catch (Exception e) {
+            System.err.println(e);
         }
     }
 
     private static void connectToServer() {
         String path = "/home/alejandro/.ssh/";
-        String filename = "id_rsa";
+        String filename = "id_rsa.pub";
         File f = new File(path+filename);
         int numPuerto = 8000;
         String host = "127.0.0.1";
-        try (Socket echoSocket = new Socket(host, numPuerto);
-             OutputStream os = echoSocket.getOutputStream();
-             ObjectOutputStream oos = new ObjectOutputStream(os);
-        )
+        try (Socket echoSocket = new Socket(host, numPuerto);)
         {
             System.out.println("Conexión hecha");
             Mensaje m = new Mensaje(f);
+            OutputStream os = echoSocket.getOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(os);
             oos.writeObject(m);
 
 
