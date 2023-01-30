@@ -1,8 +1,9 @@
 package org.example.Model;
 
 import java.io.File;
+import java.io.Serializable;
 
-public class Mensaje {
+public class Mensaje implements Serializable {
     private File f;
 
     public Mensaje(File f) {

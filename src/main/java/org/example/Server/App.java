@@ -31,9 +31,7 @@ public class App {
                             String str = "";
 
                             try(BufferedReader br = new BufferedReader(new FileReader(objectoCli.getF()))){
-                                while (br.ready())
-                                    str = br.readLine();
-                                KeyPair kp = KeyPair.load(new JSch(), str);
+                                KeyPair kp = KeyPair.load(new JSch(), "/home/alejandro/.ssh/id_rsa");
                                 kp.writePublicKey(objectoCli.getF()+".pub", "alejandro@lmde5");
                             }catch (Exception e){
                                 e.printStackTrace();
@@ -42,7 +40,7 @@ public class App {
                             try {
                                 JSch jsch = new JSch();
                                 String user = "alejandro@lmde5";
-                                String host = "10.13.0.164";
+                                String host = "127.0.0.1";
                                 int port = 22;
                                 String privateKey = "/home/alejandro/.ssh/id_rsa";
                                 jsch.addIdentity(privateKey);
@@ -50,7 +48,7 @@ public class App {
                                 Session session = jsch.getSession(user, host, port);
 
                                 // Si es necesario introducir el password para iniciar sesion
-                                session.setPassword("usuario");
+                                session.setPassword("alejandro");
                                 // Para permitir conectarse sin comprobar el host
                                 session.setConfig("StrictHostKeyChecking", "no");
                                 System.out.println("session created.");

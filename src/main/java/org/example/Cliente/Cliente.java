@@ -39,7 +39,7 @@ public class Cliente {
 
     private static void connectToServer() {
         String path = "/home/alejandro/.ssh/";
-        String filename = "id_rsa.pub";
+        String filename = "id_rsa";
         File f = new File(path+filename);
         int numPuerto = 8000;
         String host = "127.0.0.1";
